@@ -1,0 +1,13 @@
+{
+  "name": "i18n-yml-loader",
+  "version": "1.0.0",
+  "description": "webpack react-intl data loader in yaml format",
+  "main": "index.js",
+  "repository": "https://github.com/eshikerya/i18n-yml-loader.git",
+  "author": "Jacky Shikerya <shikerya@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^3.8.3",
+    "loader-utils": "^1.1.0"
+  }
+}
