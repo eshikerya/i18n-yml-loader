@@ -1,5 +1,5 @@
 const yaml = require('js-yaml');
-// const getOptions = require('loader-utils').getOptions;
+const getOptions = require('loader-utils').getOptions;
 
 module.exports = function i18nYmlLoader(source, map, isTest) {
     var loader = this;
@@ -12,7 +12,9 @@ module.exports = function i18nYmlLoader(source, map, isTest) {
             loader.emitWarning(error.toString());
         }
     });
-    // var options = getOptions(loader) || {};
+    var options = getOptions(loader) || {};
+    var idsOnly = ('IDsOnly' in options ? options.IDsOnly : loader.IDsOnly) || false;
+    var locale = ('defLocale' in options ? options.defLocale : loader.defLocale) || 'en';
     // var debug = 'debug' in options ? options.debug : loader.debug || false;
 
     const data = {}
@@ -28,17 +30,21 @@ module.exports = function i18nYmlLoader(source, map, isTest) {
                 case typeof(v) == 'string':
                     r = v;
                     break;
-                case typeof(v) == 'object' && v.en:
-                    r = v.en;
+                case typeof(v) == 'object' && v[locale]:
+                    r = v[locale];
                     break;
                 default:
                     r = null;
             }
             if (r) {
-                data[id] = {
-                    id: k,
-                    defaultMessage: r
-                }
+                data[id] = idsOnly
+                    ? {
+                        id: k
+                    }
+                    : {
+                        id: k,
+                        defaultMessage: r
+                    }
             }
         })
     })
