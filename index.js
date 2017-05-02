@@ -1,7 +1,7 @@
 const yaml = require('js-yaml');
 const getOptions = require('loader-utils').getOptions;
 
-module.exports = function i18nYmlLoader(source, map, isTest) {
+module.exports = function i18nYmlLoader(source, map) {
     var loader = this;
 
     var filename = loader.resourcePath;
@@ -18,9 +18,6 @@ module.exports = function i18nYmlLoader(source, map, isTest) {
     // var debug = 'debug' in options ? options.debug : loader.debug || false;
 
     const data = {}
-    //     locale: 'en',
-    //     messages: {}
-    // };
     Object.keys(yamlFile).forEach(ns => {
         Object.keys(yamlFile[ns]).forEach(id => {
             const v = yamlFile[ns][id];
@@ -30,7 +27,7 @@ module.exports = function i18nYmlLoader(source, map, isTest) {
                 case typeof(v) == 'string':
                     r = v;
                     break;
-                case typeof(v) == 'object' && v[locale]:
+                case typeof(v) == 'object' && !!v[locale]:
                     r = v[locale];
                     break;
                 default:
