@@ -1,37 +1,13 @@
+// @flow weak
+//
 const yaml = require('js-yaml');
 const getOptions = require('loader-utils').getOptions;
+const processor = require('./processor');
 
 module.exports = function i18nYmlLoader(source, map) {
-    const getData = (ns, src, data) =>
-        Object.keys(src).forEach(id => {
-            const v = src[id];
-            const k = `${ns}.${id}`;
-            let r;
-            switch (true) {
-                case typeof v == 'string':
-                    r = v;
-                    break;
-                case typeof v == 'object' && !!v[locale]:
-                    r = v[locale];
-                    break;
-                default:
-                    r = null;
-            }
-            if (r) {
-                data[id] = idsOnly
-                    ? {
-                          id: k
-                      }
-                    : {
-                          id: k,
-                          defaultMessage: r
-                      };
-            }
-        });
+    const loader = this;
 
-    var loader = this;
-
-    var filename = loader.resourcePath;
+    const filename = loader.resourcePath;
 
     const yamlFile = yaml.safeLoad(source, {
         filename: filename,
@@ -39,28 +15,16 @@ module.exports = function i18nYmlLoader(source, map) {
             loader.emitWarning(error.toString());
         }
     });
-    var options = getOptions(loader) || {};
-    var idsOnly = ('IDsOnly' in options ? options.IDsOnly : loader.IDsOnly) || false;
-    var locale = ('defLocale' in options ? options.defLocale : loader.defLocale) || 'en';
-    var skipPlatform = 'skipPlatform' in options ? true : false;
+    const options = getOptions(loader) || {};
+
+    const idsOnly = ('IDsOnly' in options ? options.IDsOnly : loader.IDsOnly) || false;
+    const defLocale = ('defLocale' in options ? options.defLocale : loader.defLocale) || 'en';
+    const skipPlatform = 'skipPlatform' in options ? true : false;
     // var debug = 'debug' in options ? options.debug : loader.debug || false;
 
-    const data = {};
-    Object.keys(yamlFile).forEach(ns => {
-        if (skipPlatform) {
-            const platforms = yamlFile[ns];
-            Object.keys(platforms).forEach(platform => {
-                const locales = platforms[platform];
-                getData(ns, locales, data);
-            });
-        } else {
-            getData(ns, yamlFile[ns], data);
-        }
-    });
-
-    var result;
+    let result;
     try {
-        result = JSON.stringify(data, null, '\t');
+        result = JSON.stringify(processor(yamlFile, idsOnly, defLocale, skipPlatform), null, '\t');
     } catch (ex) {
         result = JSON.stringify({
             exception: ex,
