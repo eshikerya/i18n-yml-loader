@@ -1,7 +1,7 @@
 // @flow weak
 
-const getData = (ns, src, data, defLocale, idsOnly) =>
-    Object.keys(src).forEach(id => {
+const getData = (ns, src, data, platform, defLocale, idsOnly) => {
+    for (const [id, v] of Object.entries(src)) {
         const v = src[id];
         const k = `${ns}.${id}`;
         let r;
@@ -16,7 +16,7 @@ const getData = (ns, src, data, defLocale, idsOnly) =>
                 r = null;
         }
         if (r) {
-            data[id] = idsOnly
+            data[platform][id] = idsOnly
                 ? {
                       id: k
                   }
@@ -25,21 +25,31 @@ const getData = (ns, src, data, defLocale, idsOnly) =>
                       defaultMessage: r
                   };
         }
-    });
+    }
+};
 
-module.exports = function processor(source, idsOnly, defLocale, skipPlatform) {
+module.exports = function processor(source, reqPlatform, idsOnly, defLocale, skipPlatforms) {
     const data = {};
-    Object.keys(source).forEach(ns => {
-        if (skipPlatform) {
-            const platforms = source[ns];
-            Object.keys(platforms).forEach(platform => {
-                const locales = platforms[platform];
-                getData(ns, locales, data, defLocale, idsOnly);
-            });
-        } else {
-            getData(ns, source[ns], data, defLocale, idsOnly);
+    for (const [ns, platforms] of Object.entries(source)) {
+        for (const [platform, locales] of Object.entries(platforms)) {
+            !data[platform] && (data[platform] = {});
+            getData(ns, locales, data, platform, defLocale, idsOnly);
         }
-    });
+    }
 
-    return data;
+    if (Array.isArray(reqPlatform)) {
+        let r = {};
+        reqPlatform.forEach(platform => {
+            r = { ...r, ...(data[platform] || {}) };
+        });
+        return r;
+    } else if (typeof reqPlatform == 'string') {
+        return data[reqPlatform] || {};
+    } else if (skipPlatforms) {
+        let r = {};
+        for (const [platform, pdata] of Object.entries(data)) {
+            r = { ...r, ...data[platform] };
+        }
+        return r;
+    }
 };

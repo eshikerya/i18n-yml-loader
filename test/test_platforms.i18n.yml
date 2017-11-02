@@ -1,0 +1,21 @@
+    app.component:
+        common:
+            title: this is the test title
+        mobile:
+            another_title:
+                en: test title for en
+                ru: test title for ru
+            result_message:
+                en: |
+                    {code, select,
+                        NoSuchEmail { Unfortunately, there's no such e-mail. }
+                        MessageSent { We sent you an e-mail with instructions for changing your password. }
+                        PasswordChanged { Your password was changed. Proceed to login window }
+                        BadInput { Wrong data posted. Please try again }
+                        other { forgotPassword.result-message with code [{code}] }
+                    }
+        web:
+            title: overriden title
+            another_title:
+                en: test title for en - web
+                ru: test title for ru - web
